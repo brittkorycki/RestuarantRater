@@ -1,7 +1,9 @@
 ﻿using RestaurantRater.Models;
 using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
+using System.Net;
 using System.Web;
 using System.Web.Mvc;
 
@@ -44,7 +46,7 @@ namespace RestaurantRater.Controllers
         {
             if(id == null)
             {
-                return new HttpStatusCodeResult(System.Net.HttpStatusCode.BadRequest);
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
             Restaurant restaurant = _db.Restaurants.Find(id);
             if(restaurant == null)
@@ -65,5 +67,38 @@ namespace RestaurantRater.Controllers
             return RedirectToAction("Index");
         }
 
+        //Get: Restaurant/Edit/{id}
+        //Get an id from the user
+        //handle if the id is null
+        //find a restaurant by that id
+        //if the restaurant doesn't exist
+        //return the restaurant and the view
+        public ActionResult Edit(int? id)
+        {
+            if(id == null)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+            Restaurant restaurant = _db.Restaurants.Find(id);
+            if(restaurant == null)
+            {
+                return HttpNotFound();
+            }
+            return View(restaurant);
+        }
+
+        //Post: Restaurant/Edit/{id}
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Edit (Restaurant restaurant)
+        {
+            if (ModelState.IsValid)
+            {
+                _db.Entry(restaurant).State = EntityState.Modified;
+                _db.SaveChanges();
+                return RedirectToAction("Index");
+            }
+            return View(restaurant);
+        }
     }
 }
